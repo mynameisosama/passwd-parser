@@ -4,6 +4,7 @@ import sys, traceback, json
 DEFAULT_PASSWD_FILE = "/etc/passwd"
 DEFAULT_GROUPS_FILE = "/etc/group"
 
+
 class FormatError(Exception):
     pass
 
@@ -94,4 +95,3 @@ try:
     print(json.dumps(users, indent=4))
 except(Exception):
     print(traceback.print_exc())
-
