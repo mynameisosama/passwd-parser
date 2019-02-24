@@ -1,4 +1,4 @@
-import sys, traceback, json
+import sys, traceback, json, logging
 
 
 DEFAULT_PASSWD_FILE = "/etc/passwd"
@@ -86,6 +86,10 @@ try:
 except(IndexError):
     groups = DEFAULT_GROUPS_FILE
 try:
+    logging.basicConfig(
+        filename="errors.log", level=logging.ERROR,
+        format="%(asctime)s %(message)s"
+    )
     users = dict()
     groups_by_user = dict()
     groups_by_id = dict()
@@ -93,5 +97,5 @@ try:
     parse_user_file(passwd, groups_by_id, users)
     correlate_users_groups(users, groups_by_user)
     print(json.dumps(users, indent=4))
-except(Exception):
-    print(traceback.print_exc())
+except(KeyError, IndexError, FormatError, IOError) as e:
+    logging.exception(e)
