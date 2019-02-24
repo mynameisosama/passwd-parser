@@ -50,6 +50,12 @@ def parse_user_file(_file, groups_by_id, users):
                             'full_name': u_info,
                             'groups': list()
                         }
+                else:
+                    users[u_name] = {
+                        'uid': u_uid,
+                        'full_name': u_info,
+                        'groups': list()
+                    }
     except(KeyError, IndexError, IOError) as e:
         raise(e)
 
