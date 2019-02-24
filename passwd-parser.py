@@ -8,35 +8,34 @@ class FormatError(Exception):
     pass
 
 
-def read_by_line(_file):
+def parse_group_data(_file):
     while(True):
-        data = _file.readline()
-        if(not data):
+        _data = _file.readline()
+        if(not _data):
             break
-        yield data
+        try:
+            _d = _data.split(':')
+            yield _d[0], _d[2], _d[3][:-1].split(',')
+        except(IndexError):
+            raise FormatError("Invalid Format for Groups File")
 
 
-def parse_group_data(_data):
-    _d = _data.split(':')
-    try:
-        return _d[0], _d[2], _d[3][:-1].split(',')
-    except(IndexError) as e:
-        raise FormatError("Invalid Format for Password File")
-
-
-def parse_user_data(_data):
-    _d = _data.split(':')
-    try:
-         return _d[0], _d[2], _d[3], _d[4]
-    except(IndexError) as e:
-        raise FormatError("Invalid Format for Groups File")
+def parse_user_data(_file):
+    while(True):
+        _data = _file.readline()
+        if(not _data):
+            break
+        try:
+            _d = _data.split(':')
+            yield _d[0], _d[2], _d[3], _d[4]
+        except(IndexError):
+            raise FormatError("Invalid Format for Passwd File")
 
 
 def parse_user_file(_file, groups_by_id, users):
     try:
         with open(_file) as f:
-            for line in read_by_line(f):
-                u_name, u_uid, u_gid, u_info = parse_user_data(line)
+            for u_name, u_uid, u_gid, u_info in parse_user_data(f):
                 if u_gid in groups_by_id:
                     if u_name != groups_by_id[u_gid]:
                         users[u_name] = {
@@ -57,8 +56,7 @@ def parse_user_file(_file, groups_by_id, users):
 def parse_group_file(_file, groups_by_id, groups_by_users):
     try:
         with open(_file) as f:
-            for line in read_by_line(f):
-                g_name, g_id, g_users = parse_group_data(line)
+            for g_name, g_id, g_users in parse_group_data(f):
                 for user in g_users:
                     if user in groups_by_user:
                         groups_by_user[user].append(g_name)
