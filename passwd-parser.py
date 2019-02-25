@@ -9,6 +9,16 @@ import argparse
 
 DEFAULT_PASSWD_FILE = "/etc/passwd"
 DEFAULT_GROUPS_FILE = "/etc/group"
+GROUP_DATA_LENGTH = 4
+USER_DATA_LENGTH = 7
+
+
+class ArgParserLogger(argparse.ArgumentParser):
+    """
+    Define a custom class to catch arguement parser error
+    """
+    def error(self, message):
+        raise AttributeError(message)
 
 
 class FormatError(Exception):
@@ -30,6 +40,8 @@ def parse_group_data(_file):
             break
         try:
             _d = _data.split(':')
+            if len(_d) != GROUP_DATA_LENGTH:
+                raise FormatError("Invalid Format for Groups File")
             yield _d[0], _d[2], _d[3][:-1].split(',')
         except IndexError:
             raise FormatError("Invalid Format for Groups File")
@@ -47,6 +59,8 @@ def parse_user_data(_file):
             break
         try:
             _d = _data.split(':')
+            if len(_d) != USER_DATA_LENGTH:
+                raise FormatError("Invalid Format for Passwd File")
             yield _d[0], _d[2], _d[3], _d[4]
         except IndexError:
             raise FormatError("Invalid Format for Passwd File")
@@ -128,35 +142,38 @@ def correlate_users_groups(_users, _groups_by_user):
         raise exc
 
 
-# Argument Parser
-parser = argparse.ArgumentParser(
-    description="combine and correlate user and group data"
-)
-parser.add_argument(
-    "-p", "--passwd", type=str,
-    help="path to passwords file, default=/etc/passwd",
-    default=DEFAULT_PASSWD_FILE
-)
-parser.add_argument(
-    "-g", "--groups", type=str,
-    help="path to groups file, default=/etc/group",
-    default=DEFAULT_GROUPS_FILE
-)
-args = parser.parse_args()
 try:
     # Setup Logging
-    path = os.path.dirname(os.path.abspath(__file__))
     logging.basicConfig(
-        filename="%s/errors.log" % path, level=logging.ERROR,
+        filename="%s/errors.log" % os.path.dirname(os.path.abspath(__file__)),
+        level=logging.ERROR,
         format="%(asctime)s %(message)s"
     )
+    # Argument Parser
+    parser = ArgParserLogger(
+        description="combine and correlate user and group data"
+    )
+    parser.add_argument(
+        "-p", "--passwd", type=str,
+        help="path to passwords file, default=/etc/passwd",
+        default=DEFAULT_PASSWD_FILE
+    )
+    parser.add_argument(
+        "-g", "--groups", type=str,
+        help="path to groups file, default=/etc/group",
+        default=DEFAULT_GROUPS_FILE
+    )
+    args = parser.parse_args()
+    # Create Dictionaries
     users = dict()
     groups_by_user = dict()
     groups_by_id = dict()
+    # Parse Files and Populate Dictionaries
     parse_group_file(args.groups, groups_by_id, groups_by_user)
     parse_user_file(args.passwd, groups_by_id, users)
+    # Correlate Users and Groups
     correlate_users_groups(users, groups_by_user)
     # Print output to stdout
     print json.dumps(users, indent=4)
-except(KeyError, IndexError, FormatError, IOError) as exc:
+except(AttributeError, KeyError, IndexError, FormatError, IOError) as exc:
     logging.exception(exc)
