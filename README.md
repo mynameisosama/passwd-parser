@@ -1,6 +1,6 @@
 # Passwd-Parser
-`https://www.github.com/mynameisosama/passwd-parser`
 The following python script correlates data between user and groups of a linux system
+`https://www.github.com/mynameisosama/passwd-parser`
 
 - Supported user file format `<name>:<x>:<user_id>:<group_id>:<description>`
 - Supported group file format `<name>:<x>:<group_id>:<users>`
