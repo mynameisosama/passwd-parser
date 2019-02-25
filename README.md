@@ -2,7 +2,7 @@
 The following python script correlates data between user and groups of a linux system
 `https://www.github.com/mynameisosama/passwd-parser`
 
-- Supported user file format `<name>:<x>:<user_id>:<group_id>:<description>`
+- Supported user file format `<name>:<x>:<user_id>:<group_id>:<description>:<home_dir>:<command>`
 - Supported group file format `<name>:<x>:<group_id>:<users>`
 - The program prints correlated data as json object to stdout
 - The program maintains an error.log file in the same directory
