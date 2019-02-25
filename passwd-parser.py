@@ -1,4 +1,4 @@
-import sys, traceback, json, logging
+import os, sys, traceback, json, logging, argparse
 
 
 DEFAULT_PASSWD_FILE = "/etc/passwd"
@@ -83,24 +83,31 @@ def correlate_users_groups(users, grousp_by_users):
         raise(e)
 
 
+parser = argparse.ArgumentParser(
+    description="combine and correlate user and group data"
+)
+parser.add_argument(
+    "-p", "--passwd", type=str,
+    help="path to passwords file, default=/etc/passwd",
+    default=DEFAULT_PASSWD_FILE
+)
+parser.add_argument(
+    "-g", "--groups", type=str,
+    help="path to groups file, default=/etc/group",
+    default=DEFAULT_GROUPS_FILE
+)
+args = parser.parse_args()
 try:
-    passwd = sys.argv[1]
-except(IndexError):
-    passwd = DEFAULT_PASSWD_FILE
-try:
-    groups = sys.argv[2]
-except(IndexError):
-    groups = DEFAULT_GROUPS_FILE
-try:
+    path = os.path.dirname(os.path.abspath(__file__))
     logging.basicConfig(
-        filename="errors.log", level=logging.ERROR,
+        filename="%s/errors.log" % path, level=logging.ERROR,
         format="%(asctime)s %(message)s"
     )
     users = dict()
     groups_by_user = dict()
     groups_by_id = dict()
-    parse_group_file(groups, groups_by_id, groups_by_user)
-    parse_user_file(passwd, groups_by_id, users)
+    parse_group_file(args.groups, groups_by_id, groups_by_user)
+    parse_user_file(args.passwd, groups_by_id, users)
     correlate_users_groups(users, groups_by_user)
     print(json.dumps(users, indent=4))
 except(KeyError, IndexError, FormatError, IOError) as e:
