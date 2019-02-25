@@ -15,7 +15,8 @@ Usage:
 - Run with default passwd file and specific group file `python passwd-parser.py -g <path_to_group_file>`
 - Run with default group file and specific passwd file `python passwd-parser.py -p <path_to_passwd_file>`
 - Run with specific group and passwd files `python passwd-parser.py -p <path_to_passwd_file> -g <path_to_group_file>`
-- Cron Job (Runs every 15 min) `*/15 * * * * <path_to_python_bin> <path_to_script>/passwd-parser.py > <output_file_path>.json 2>&1`
+- Cron Job (Runs every 15 min)
+    - `*/15 * * * * <path_to_python_bin> <path_to_script>/passwd-parser.py > <output_file_path>.json 2>&1`
 - Example
     - `DATEVAR=date +%Y-%m-%d_%H:%M:%S`
     - `*/15 * * * * /usr/bin/python /home/ubuntu/passwd-parser/passwd-parser.py > /home/ubuntu/passwd-parser/$($DATEVAR).json 2>&1`
